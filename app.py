@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.cluster import KMeans, DBSCAN, AgglomerativeClustering
+from sklearn_extra.cluster import KMedoids
 from sklearn.metrics import silhouette_score, davies_bouldin_score, calinski_harabasz_score
 from scipy.cluster.hierarchy import dendrogram, linkage
 from sklearn.preprocessing import StandardScaler
@@ -14,22 +15,27 @@ warnings.filterwarnings('ignore')
 # ---------------------------
 # 1. Load and Preprocess Data
 # ---------------------------
-def load_and_preprocess_data(file):
+def load_and_preprocess_data(file, handle_missing='median', handle_outliers=True, normalize=True):
     data = pd.read_csv(file)
-
-    # Only fill missing values in numeric columns
     numeric_cols = data.select_dtypes(include=np.number).columns
-    data[numeric_cols] = data[numeric_cols].fillna(data[numeric_cols].median())
 
-    # Handling outliers (only numeric data)
-    z_scores = np.abs(zscore(data[numeric_cols]))
-    data = data[(z_scores < 3).all(axis=1)]
+    if handle_missing == 'median':
+        data[numeric_cols] = data[numeric_cols].fillna(data[numeric_cols].median())
+    elif handle_missing == 'mean':
+        data[numeric_cols] = data[numeric_cols].fillna(data[numeric_cols].mean())
+    elif handle_missing == 'drop':
+        data = data.dropna()
 
-    # Standardization (only numeric data)
-    scaler = StandardScaler()
-    data_scaled = scaler.fit_transform(data[numeric_cols])
+    if handle_outliers:
+        z_scores = np.abs(zscore(data[numeric_cols]))
+        data = data[(z_scores < 3).all(axis=1)]
 
-    return pd.DataFrame(data_scaled, columns=numeric_cols)
+    if normalize:
+        scaler = StandardScaler()
+        data_scaled = scaler.fit_transform(data[numeric_cols])
+        return pd.DataFrame(data_scaled, columns=numeric_cols)
+    else:
+        return data[numeric_cols]
 
 # ---------------------------
 # 2. Clustering Algorithms
@@ -40,6 +46,10 @@ def apply_kmeans(X, n_clusters):
     labels = model.fit_predict(X)
     return labels, model.cluster_centers_
 
+def apply_kmedoids(X, n_clusters):
+    model = KMedoids(n_clusters=n_clusters, random_state=42)
+    labels = model.fit_predict(X)
+    return labels, model.cluster_centers_
 
 def apply_agnes(X, n_clusters, linkage_method='ward'):
     model = AgglomerativeClustering(n_clusters=n_clusters, linkage=linkage_method)
@@ -89,14 +99,6 @@ def plot_dendrogram(X, method='ward'):
     plt.title('Dendrogram')
     st.pyplot(plt)
 
-
-def apply_kmedoids(X, n_clusters):
-    model = KMedoids(n_clusters=n_clusters, random_state=42)
-    labels = model.fit_predict(X)
-    return labels, model.cluster_centers_
-
-
-
 # ---------------------------
 # 4. Metrics Calculation
 # ---------------------------
@@ -120,10 +122,15 @@ st.title('Clustering Interface for Data Mining TP4')
 uploaded_file = st.file_uploader("Upload your CSV file", type=["csv"])
 
 if uploaded_file is not None:
-    X = load_and_preprocess_data(uploaded_file)
+    st.sidebar.header('Preprocessing Options')
+    handle_missing = st.sidebar.selectbox("Handle missing values", ['median', 'mean', 'drop'])
+    handle_outliers = st.sidebar.checkbox("Remove outliers (Z-Score)", value=True)
+    normalize = st.sidebar.checkbox("Normalize features", value=True)
+
+    X = load_and_preprocess_data(uploaded_file, handle_missing, handle_outliers, normalize)
 
     st.sidebar.header('Clustering Options')
-    method = st.sidebar.selectbox('Choose clustering method', ['KMeans', 'AGNES', 'DIANA', 'DBSCAN'])
+    method = st.sidebar.selectbox('Choose clustering method', ['KMeans', 'KMedoids', 'AGNES', 'DIANA', 'DBSCAN'])
     if method in ['KMeans', 'KMedoids', 'AGNES', 'DIANA']:
         n_clusters = st.sidebar.slider('Number of clusters', 2, 10, 3)
     if method == 'DBSCAN':
@@ -158,7 +165,6 @@ if uploaded_file is not None:
 
         st.subheader('Clustering Metrics Comparison')
         st.dataframe(metrics_df)
-
 
         st.subheader('Optional: Elbow Method (for KMeans/KMedoids)')
         if method in ['KMeans', 'KMedoids']:
