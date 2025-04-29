@@ -16,19 +16,20 @@ warnings.filterwarnings('ignore')
 # ---------------------------
 def load_and_preprocess_data(file):
     data = pd.read_csv(file)
-    
-    # Handling missing values
-    data.fillna(data.median(), inplace=True)
 
-    # Handling outliers using Z-Score
-    z_scores = np.abs(zscore(data.select_dtypes(include=np.number)))
+    # Only fill missing values in numeric columns
+    numeric_cols = data.select_dtypes(include=np.number).columns
+    data[numeric_cols] = data[numeric_cols].fillna(data[numeric_cols].median())
+
+    # Handling outliers (only numeric data)
+    z_scores = np.abs(zscore(data[numeric_cols]))
     data = data[(z_scores < 3).all(axis=1)]
 
-    # Standardization
+    # Standardization (only numeric data)
     scaler = StandardScaler()
-    data_scaled = scaler.fit_transform(data)
+    data_scaled = scaler.fit_transform(data[numeric_cols])
 
-    return pd.DataFrame(data_scaled, columns=data.columns)
+    return pd.DataFrame(data_scaled, columns=numeric_cols)
 
 # ---------------------------
 # 2. Clustering Algorithms
