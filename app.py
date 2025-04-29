@@ -143,11 +143,15 @@ if uploaded_file is not None:
             plot_scatter(X.values, labels, None, 'DBSCAN Clustering')
 
         silhouette, davies, calinski = calculate_metrics(X, labels)
+        metrics_data = {
+            'Metric': ['Silhouette Score', 'Davies-Bouldin Index', 'Calinski-Harabasz Score'],
+            'Value': [silhouette, davies, calinski]
+        }
+        metrics_df = pd.DataFrame(metrics_data)
 
-        st.subheader('Clustering Metrics')
-        st.write(f"Silhouette Score: {silhouette}")
-        st.write(f"Davies-Bouldin Index: {davies}")
-        st.write(f"Calinski-Harabasz Score: {calinski}")
+        st.subheader('Clustering Metrics Comparison')
+        st.dataframe(metrics_df)
+
 
         st.subheader('Optional: Elbow Method (for KMeans/KMedoids)')
         if method in ['KMeans', 'KMedoids']:
