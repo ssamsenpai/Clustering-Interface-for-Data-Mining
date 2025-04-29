@@ -115,8 +115,7 @@ if uploaded_file is not None:
     X = load_and_preprocess_data(uploaded_file)
 
     st.sidebar.header('Clustering Options')
-    method = st.sidebar.selectbox('Choose clustering method', ['KMeans', 'KMedoids', 'AGNES', 'DIANA', 'DBSCAN'])
-
+    method = st.sidebar.selectbox('Choose clustering method', ['KMeans', 'AGNES', 'DIANA', 'DBSCAN'])
     if method in ['KMeans', 'KMedoids', 'AGNES', 'DIANA']:
         n_clusters = st.sidebar.slider('Number of clusters', 2, 10, 3)
     if method == 'DBSCAN':
