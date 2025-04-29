@@ -138,7 +138,7 @@ if uploaded_file is not None:
             plot_scatter(X.values, labels, centers, 'KMeans Clustering')
         elif method == 'KMedoids':
             labels, centers = apply_kmeans(X, n_clusters)
-            plot_scatter(X.values, labels, centers, 'KMedoids Clustering')
+            plot_scatter(X.values, labels, centers, 'KMeans Clustering')
         elif method == 'AGNES':
             labels = apply_agnes(X, n_clusters)
             plot_scatter(X.values, labels, None, 'AGNES Clustering')
