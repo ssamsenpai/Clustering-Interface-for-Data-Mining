@@ -6,8 +6,6 @@ from sklearn.cluster import KMeans, DBSCAN, AgglomerativeClustering
 from sklearn.metrics import silhouette_score, davies_bouldin_score, calinski_harabasz_score
 from scipy.cluster.hierarchy import dendrogram, linkage
 from sklearn.preprocessing import StandardScaler
-from sklearn_extra.cluster import KMedoids
-from sklearn.metrics import silhouette_samples
 from scipy.stats import zscore
 import streamlit as st
 import warnings
