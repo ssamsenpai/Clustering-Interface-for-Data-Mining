@@ -126,7 +126,7 @@ if uploaded_file is not None:
     if st.sidebar.button('Run Clustering'):
         if method == 'KMeans':
             labels, centers = apply_kmeans(X, n_clusters)
-            plot_scatter(X.values, labels, centers, 'KMeans Clustering')
+            plot_scatter(X, labels, centers, 'KMeans Clustering')
         elif method == 'KMedoids':
             labels, centers = apply_kmedoids(X, n_clusters)
             plot_scatter(X.values, labels, centers, 'KMedoids Clustering')
