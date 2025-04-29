@@ -3,7 +3,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.cluster import KMeans, DBSCAN, AgglomerativeClustering
-from sklearn_extra.cluster import KMedoids
 from sklearn.metrics import silhouette_score, davies_bouldin_score, calinski_harabasz_score
 from scipy.cluster.hierarchy import dendrogram, linkage
 from sklearn.preprocessing import StandardScaler
@@ -40,10 +39,6 @@ def apply_kmeans(X, n_clusters):
     labels = model.fit_predict(X)
     return labels, model.cluster_centers_
 
-def apply_kmedoids(X, n_clusters):
-    model = KMedoids(n_clusters=n_clusters, random_state=42)
-    labels = model.fit_predict(X)
-    return labels, model.cluster_centers_
 
 def apply_agnes(X, n_clusters, linkage_method='ward'):
     model = AgglomerativeClustering(n_clusters=n_clusters, linkage=linkage_method)
