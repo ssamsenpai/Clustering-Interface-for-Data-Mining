@@ -6,6 +6,8 @@ from sklearn.cluster import KMeans, DBSCAN, AgglomerativeClustering
 from sklearn.metrics import silhouette_score, davies_bouldin_score, calinski_harabasz_score
 from scipy.cluster.hierarchy import dendrogram, linkage
 from sklearn.preprocessing import StandardScaler
+from sklearn_extra.cluster import KMedoids
+from sklearn.metrics import silhouette_samples
 from scipy.stats import zscore
 import streamlit as st
 import warnings
@@ -89,6 +91,14 @@ def plot_dendrogram(X, method='ward'):
     plt.title('Dendrogram')
     st.pyplot(plt)
 
+
+def apply_kmedoids(X, n_clusters):
+    model = KMedoids(n_clusters=n_clusters, random_state=42)
+    labels = model.fit_predict(X)
+    return labels, model.cluster_centers_
+
+
+
 # ---------------------------
 # 4. Metrics Calculation
 # ---------------------------
@@ -140,6 +150,7 @@ if uploaded_file is not None:
         elif method == 'DBSCAN':
             labels = apply_dbscan(X, eps, min_samples)
             plot_scatter(X.values, labels, None, 'DBSCAN Clustering')
+        
 
         silhouette, davies, calinski = calculate_metrics(X, labels)
         metrics_data = {
